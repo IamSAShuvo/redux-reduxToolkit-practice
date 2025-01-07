@@ -18,13 +18,10 @@ const DECREMENT = "decrement";
 const INCREMENT_BY_AMOUNT = "incrementByAmount";
 
 // setInterval Stopper
-let intervalStopper = 0;
+let breakInterval = 0;
 
 // Store
-const store = createStore(
-  reducer,
-  applyMiddleware(logger.default, thunk.default)
-);
+const store = createStore(reducer, applyMiddleware(logger.default, thunk));
 
 // Reducer
 function reducer(state = initialState, action) {
@@ -59,29 +56,36 @@ function reducer(state = initialState, action) {
 
 // Async API Call
 // axios
-async function fetchData() {
-  const { data } = await axios.get("http://localhost:3000/accounts/1");
-  return data;
+function fetchData(id, type) {
+  return async (dispatch) => {
+    const { data } = await axios.get(`http://localhost:3000/accounts/${id}`);
+    dispatch(actionName(type, data.amount));
+  };
 }
 
 // Dispatch Action Function
-async function actionName(action, value = 0) {
-  const { data } = await axios.get("http://localhost:3000/accounts/1");
+function actionName(action, value = 0) {
   return {
     type: action,
     payload: value,
   };
 }
 
-let stopInterval = setInterval(() => {
-  store.dispatch(actionName("INIT", 500));
-  intervalStopper++;
-  if (
-    (store.getState().amount >= 30 || store.getState().amount <= -30) &&
-    intervalStopper >= 1
-  ) {
-    clearInterval(stopInterval);
-  }
+//* If want to dispatch multiple action
+// let stopInterval = setInterval(() => {
+//   store.dispatch(fetchData);
+//   breakInterval++;
+//   if (
+//     (store.getState().amount >= 30 || store.getState().amount <= -30) &&
+//     breakInterval >= 1
+//   ) {
+//     clearInterval(stopInterval);
+//   }
+// }, 1000);
+
+// * If want to dispatch single action
+setTimeout(() => {
+  store.dispatch(fetchData(2, "INIT"));
 }, 1000);
 
 // store.dispatch({ type: "INCREMENT" });

@@ -1,6 +1,7 @@
 import { createStore, applyMiddleware } from "redux";
 import logger from "redux-logger";
 import axios from "axios";
+import { thunk } from "redux-thunk";
 
 // Action
 const initialState = {
@@ -20,7 +21,10 @@ const INCREMENT_BY_AMOUNT = "incrementByAmount";
 let intervalStopper = 0;
 
 // Store
-const store = createStore(reducer, applyMiddleware(logger.default));
+const store = createStore(
+  reducer,
+  applyMiddleware(logger.default, thunk.default)
+);
 
 // Reducer
 function reducer(state = initialState, action) {
@@ -53,8 +57,16 @@ function reducer(state = initialState, action) {
 //   console.log("the history", history);
 // });
 
+// Async API Call
+// axios
+async function fetchData() {
+  const { data } = await axios.get("http://localhost:3000/accounts/1");
+  return data;
+}
+
 // Dispatch Action Function
-function actionName(action, value = 0) {
+async function actionName(action, value = 0) {
+  const { data } = await axios.get("http://localhost:3000/accounts/1");
   return {
     type: action,
     payload: value,
@@ -66,7 +78,7 @@ let stopInterval = setInterval(() => {
   intervalStopper++;
   if (
     (store.getState().amount >= 30 || store.getState().amount <= -30) &&
-    intervalStopper >= 5
+    intervalStopper >= 1
   ) {
     clearInterval(stopInterval);
   }
